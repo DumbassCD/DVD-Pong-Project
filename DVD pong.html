@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>DVD pong lvl 2</title>
+	<style>
+		canvas {border: 3px solid #00ACE6; background: #222; display: block; margin: 0 auto; }
+	</style>
+</head>
+<body>
+<canvas id="myCanvas" width='800' height='600'></canvas>
+<script>
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var wcanvas = 800;
+var hcanvas = 600;
+var x = 400;
+var y = 300;
+var dx = 2;
+var dy = 2;
+var plHeight = 10;
+var plWidth = 75;
+var plX = (canvas.width-plWidth)/2;
+var plY = canvas.height-plHeight - 10;
+var objRow = 6;
+var objColumn = 7;
+var objPadding = 10;
+var objTop = 30;
+var objOffTop = 30;
+var objOffLeft = 30;
+		
+				var objects = [];
+				for (var c = 0; c < objColumn; c++) {
+				objects[c] = [];
+				for (var r = 0; r < objRow; r++) {
+					objects[c][r] = { x: 0, y: 0 };
+				}
+			}
+
+var objX = objOffLeft + (c * (objWidth + objPadding));
+var objY = objTop + (r * (objHeight + objPadding));
+var c = 0;
+var r = 0;
+var objWidth = 90;
+var objHeight = 30;
+myCanvas.width = wcanvas;
+myCanvas.height = hcanvas;
+var ballRaidus = 10;
+var ballColor = "#FF0000";
+var rightPress = false
+var leftPress = false
+
+document.addEventListener("keydown", keyDownHandler);
+document.addEventListener("keyup", keyUpHandler);
+
+function keyDownHandler(e)
+{
+if(e.keyCode === 39) {
+	rightPress = true;
+}
+else if(e.keyCode === 37) {
+	leftPress = true;
+}
+};
+
+function keyUpHandler(e)
+{
+if(e.keyCode === 39) {
+	rightPress = false;
+}
+else if(e.keyCode === 37) {
+	leftPress = false;
+}
+};
+
+function drawBall() 
+{
+ctx.beginPath();
+ctx.arc(x, y, ballRaidus, 0, Math.PI*2);
+ctx.fillStyle = ballColor;
+ctx.fill();
+ctx.closePath();
+};
+
+function drawPl()
+{
+ctx.beginPath();
+ctx.rect(plX, plY, plWidth, plHeight);
+ctx.fillStyle = "#00ACE6";
+ctx.fill();
+ctx.closePath();
+};
+
+					function drawObj() {
+				for(var c = 0; c < objColumn; c++) {
+					for(var r = 0; r < objRow; r++) {
+						var objX = objOffLeft + (c * (objWidth + objPadding)) ;
+						var objY = (r * (objHeight + objPadding)) + objOffTop;
+						objects[c][r].x = objX;
+						objects[c][r].y = objY;
+						ctx.beginPath();
+						ctx.rect(objX, objY, objWidth, objHeight);
+						ctx.fillStyle = "#FEFE22";
+						ctx.fill();
+						ctx.closePath();
+					}
+				}
+			}
+		
+function checkBrickCollision() {
+        for (let c = 0; c < objColumn; c++) {
+        for (let r = 0; r < objRow; r++) {
+            let b = bricks[c][r]; // Was objectuh
+            if (b.status > 0) {
+                if (ballX + ballRadius > b.x &&
+                    ballX - ballRadius < b.x + brickWidth &&
+            ballY + ballRadius > b.y &&
+            ballY - ballRadius < b.y + brickHeight) {
+
+            ballSpeedY = -ballSpeedY; //dy = -dy
+
+            if (b.status === 1) {
+                score += 100;
+                b.status = 0; // Уничтожаем кирпич
+            } else if (b.status === 2) {
+                b.status = 1; //lower the metodist
+                score += 100; //meth-o-dist
+            }
+        }
+    }
+}
+}
+}
+
+function draw()
+{
+ctx.clearRect(0,0,canvas.width,canvas.height);
+drawObj()
+drawBall();
+x+=dx;
+y+=dy;
+if (y-ballRaidus<0) dy=-dy
+else if (y + ballRaidus > canvas.height) { 
+alert("Game Over!");
+document.location.reload();
+clearInterval(interval); }
+else if (y + ballRaidus > plY && y + ballRaidus < plY + plHeight && x + ballRaidus > plX && x + ballRaidus < plX + plWidth)
+dy=-dy
+if (x-ballRaidus<0) dx=-dx
+else if (x+ballRaidus>canvas.width) dx=-dx
+drawPl();
+if(rightPress && plX<wcanvas-plWidth) {
+	plX += 7;
+}
+	else if(leftPress && plX>0) {
+			plX -= 7;
+		}
+};
+
+var interval = setInterval(draw,10);
+</script>
+</body>
+</html>
