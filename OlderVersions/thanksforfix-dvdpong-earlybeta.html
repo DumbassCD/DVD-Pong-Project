@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <title>fixed ping pong rework</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+        }
+        canvas {
+            border: 3px solid #00ACE6;
+            background: #222;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Player parameters
+    let plHeight = 10;
+    let plWidth = 75;
+    let plX = (canvas.width - plWidth) / 2;
+    let plY = canvas.height - plHeight - 10;
+    let rightPress = false;
+    let leftPress = false;
+
+    // Ball parameters
+    let ballRadius = 20;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height / 2;
+    let ballSpeedX = 4;
+    let ballSpeedY = -4;
+
+    // Load ball image
+    const ballImg = new Image();
+    ballImg.src = 'dvd_small.png';  // ← Replace with your image filename
+
+    document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keyup', keyUpHandler);
+
+    function keyDownHandler(e) {
+        if (e.keyCode === 39) { // Right arrow
+            rightPress = true;
+        } else if (e.keyCode === 37) { // Left arrow
+            leftPress = true;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if (e.keyCode === 39) {
+            rightPress = false;
+        } else if (e.keyCode === 37) {
+            leftPress = false;
+        }
+    }
+
+    function drawPlayer() {
+        ctx.fillStyle = '#00ACE6';
+        ctx.fillRect(plX, plY, plWidth, plHeight);
+    }
+
+    function drawBall() {
+        ctx.drawImage(
+            ballImg,
+            ballX - ballRadius,
+            ballY - ballRadius,
+            ballRadius * 2,
+            ballRadius * 2
+        );
+    }
+	
+	function bricks() {
+	    var objRow = 6; //line obj
+		var objColumn = 7; //column obj 
+		var objPadding = 10;
+		var objOffTop = 30;
+		var objOffLeft = 30;
+		var objects = [];
+		for (var c = 0; c < objColumn; c++) {
+		objects[c] = [];
+		for (var r = 0; r < objRow; r++) {
+		    objects[c][r] = { x: 0, y: 0}; 
+			objects[c][r].x = objX;
+			objects[c][r].y = objY;
+		var objX = objOffLeft + (c * (obj.Width +objPadding));
+		
+		}
+    }
+
+    function updateBallPosition() {
+        // Bounce off left/right walls
+        if (ballX + ballSpeedX < ballRadius || ballX + ballSpeedX > canvas.width - ballRadius) {
+            ballSpeedX = -ballSpeedX;
+        }
+
+        // Bounce off top wall
+        if (ballY + ballSpeedY < ballRadius) {
+            ballSpeedY = -ballSpeedY;
+        }
+
+        // Hit paddle?
+        if (
+            ballY + ballSpeedY > plY - ballRadius &&
+            ballY + ballSpeedY < plY + plHeight &&
+            ballX > plX &&
+            ballX < plX + plWidth
+        ) {
+            ballSpeedY = -ballSpeedY;
+            ballSpeedX += (Math.random() - 0.5) * 2;
+        }
+
+        // Game over
+        if (ballY + ballSpeedY > canvas.height - ballRadius) {
+            alert("Game Over... continue?");
+            document.location.reload();
+            return;
+        }
+
+        ballX += ballSpeedX;
+        ballY += ballSpeedY;
+    }
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Move paddle
+        if (rightPress && plX < canvas.width - plWidth) {
+            plX += 7;
+        } else if (leftPress && plX > 0) {
+            plX -= 7;
+        }
+
+        updateBallPosition();
+        drawBall();   // Now uses image
+        drawPlayer();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Start game when image loads
+    ballImg.onload = function() {
+	    gameLoop(); //loading
+	};
+    </script>
+</body>
+</html>

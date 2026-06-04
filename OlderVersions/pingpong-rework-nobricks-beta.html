@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <title>whatever is this ping pong</title>
+	<style>
+        .lik {
+            border-color: #BECC41;
+            border-style: solid;
+        }
+        img {
+            border-color: #BECC39;
+            border-style: double;
+            padding: 20px;
+            background: Khaki;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+		var interval = setInterval(draw, 10);
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        //Player params
+        let plHeight = 10; //высота height 2932832983
+        let plWidth = 75; //ширина width fps30 dajsd why my projects are bullshit
+        let plX = (canvas.width - plWidth) / 2; //up????
+        let plY = canvas.height - plHeight - 10; //its down
+        let rightPress = false; //left or right
+        let leftPress = false; //ping pong eh
+
+        document.addEventListener('keydown', keyDownHandler);
+        document.addEventListener('keyup', keyUpHandler);
+
+        function keyDownHandler(e) {
+            if (e.keyCode === 39) { //look -->
+                rightPress = true;
+            } else if (e.keyCode === 37) { //look <--
+                leftPress = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if (e.keyCode === 39) { //fricking right
+                rightPress = false;
+            } else if (e.keyCode === 37) { //left
+                leftPress = false;
+            }
+        }
+
+        // 
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (rightPress && plX < canvas.width - plWidth) { //whatever is this...
+                plX += 7;
+            } else if (leftPress && plX > 0) {
+                plX -= 7;
+            }
+
+            //this is a fucking atari 2600 game in hd 
+            ctx.fillStyle = 'cyan';
+            ctx.fillRect(plX, plY, plWidth, plHeight);
+
+            requestAnimationFrame(gameLoop);
+        }
+		
+		function ballRadius() {
+		    if (y + dy, < 0 + ballRadius){
+                dy = -dy;
+            } else if (y + dy > canvas.height - ballRadius) {
+			        if (x > plX && x <plX + plWidth) {
+					dy = -dy; }
+			    else {
+			    alert("Game over...");
+				document.location.reload();
+				clearInterval(interval);
+				};
+
+        //im on a plain, i cant complain 
+        gameLoop();
+    </script>
+</body>
+</html>

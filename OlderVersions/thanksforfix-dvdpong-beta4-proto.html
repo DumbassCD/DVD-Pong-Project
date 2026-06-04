@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <title>fixed ping pong rework</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+        }
+        canvas {
+            border: 3px solid #00ACE6;
+            background: #222;
+        }
+    </style>
+</head>
+<body> 
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Player parameters
+    let plHeight = 10;
+    let plWidth = 75;
+    let plX = (canvas.width - plWidth) / 2;
+    let plY = canvas.height - plHeight - 10;
+    let rightPress = false;
+    let leftPress = false;
+
+    // Ball parameters
+    let ballRadius = 20;
+    let ballX = canvas.width / 2.5;
+    let ballY = canvas.height / 2;
+    let ballSpeedX = 4;
+    let ballSpeedY = -4;
+
+    // Bricks parameters
+    let objRow = 6;
+    let objColumn = 7;
+    let objPadding = 10;
+    let objOffTop = 30;
+    let objOffLeft = 30;
+    let brickWidth = 90;
+    let brickHeight = 30;
+    let bricks = [];
+	
+	// Score
+	let score = 0;
+	
+	// Timer
+	let startTime;
+	let elapsedTime = 0;
+
+    // Load ball image
+    const ballImg = new Image();
+    ballImg.src = 'dvd_small.png';  // ← Replace with your image filename
+
+    // Brick images
+    const brickImages = [
+        'dvd_disk1_verbatim.jpg',
+        'dvd_disk2_philips.jpg',
+		'dvd_disk4_smarttrack.jpg'
+    ];
+
+    document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keyup', keyUpHandler);
+
+    function keyDownHandler(e) {
+        if (e.keyCode === 39) { // Right arrow
+            rightPress = true;
+        } else if (e.keyCode === 37) { // Left arrow
+            leftPress = true;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if (e.keyCode === 39) {
+            rightPress = false;
+        } else if (e.keyCode === 37) {
+            leftPress = false;
+        }
+    }
+
+    function drawPlayer() {
+        ctx.fillStyle = '#00ACE6';
+        ctx.fillRect(plX, plY, plWidth, plHeight);
+    }
+	
+	function drawScore() {
+	    ctx.font = "16px Arial";
+		ctx.fillStyle = "#00ACE6";
+		ctx.fillText("Score "+score, 8, 350); 
+	}
+	function drawTime() { 
+	    ctx.font = "16px Arial";
+		ctx.fillStyle = "#00ACE6";
+		ctx.fillText("Time " + elapsedTime + "s", 8, 320);
+	}
+    function drawBall() {
+        ctx.drawImage(
+            ballImg,
+            ballX - ballRadius,
+            ballY - ballRadius,
+            ballRadius * 2,
+            ballRadius * 2
+        );
+    }
+	
+
+    function createBricks() {
+        for (let c = 0; c < objColumn; c++) {
+            bricks[c] = [];
+            for (let r = 0; r < objRow; r++) {
+                bricks[c][r] = {
+                    x: c * (brickWidth + objPadding) + objOffLeft,
+                    y: r * (brickHeight + objPadding) + objOffTop,
+                    status: 1 // 1 = active, 0 = destroyed
+                };
+            }
+        }
+    }
+
+    function drawBricks() {
+        for (let c = 0; c < objColumn; c++) { // og was //weezer blue (standard, not deluxe) bricks
+            for (let r = 0; r < objRow; r++) {
+                if (bricks[c][r].status === 1) {
+                    let brickX = bricks[c][r].x;
+                    let brickY = bricks[c][r].y;
+
+                    // Pick a random brick image for each brick
+                    const img = new Image();
+                    img.src = brickImages[Math.floor(Math.random() * brickImages.length)];
+
+                    // Draw image
+                    ctx.drawImage(img, brickX, brickY, brickWidth, brickHeight);
+                }
+            }
+        }
+    }
+
+    function checkBrickCollision() {
+        for (let c = 0; c < objColumn; c++) {
+        for (let r = 0; r < objRow; r++) {
+            let b = bricks[c][r]; // Was objectuh
+            if (b.status > 0) {
+                if (ballX + ballRadius > b.x &&
+                    ballX - ballRadius < b.x + brickWidth &&
+            ballY + ballRadius > b.y &&
+            ballY - ballRadius < b.y + brickHeight) {
+
+            ballSpeedY = -ballSpeedY; //dy = -dy
+
+            if (b.status === 1) {
+                score++;
+                b.status = 0; // Уничтожаем кирпич
+            } else if (b.status === 2) {
+                b.status = 1; //lower the metodist
+                score += 100; //meth-o-dist
+            }
+        }
+    }
+}
+}
+}
+
+    function updateBallPosition() {
+        // Bounce off left/right walls
+        if (ballX + ballSpeedX < ballRadius || ballX + ballSpeedX > canvas.width - ballRadius) {
+            ballSpeedX = -ballSpeedX;
+        }
+
+        // Bounce off top wall
+        if (ballY + ballSpeedY < ballRadius) {
+            ballSpeedY = -ballSpeedY;
+        }
+
+        // Hit paddle?
+        if (
+            ballY + ballSpeedY > plY - ballRadius &&
+            ballY + ballSpeedY < plY + plHeight &&
+            ballX > plX &&
+            ballX < plX + plWidth
+        ) {
+            ballSpeedY = -ballSpeedY;
+            ballSpeedX += (Math.random() - 0.5) * 2;
+        }
+
+        // Check brick collision
+        checkBrickCollision();
+
+        // Game over
+        if (ballY + ballSpeedY > canvas.height - ballRadius) {
+            alert("Game Over... continue?"); 
+            resetGame();
+            return;
+        }
+
+        ballX += ballSpeedX;
+        ballY += ballSpeedY;
+    }
+
+    function gameLoop() {
+	    elapsedTime = Math.floor((Date.now() - startTime) / 1000); 
+		
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // it was for score, time, rings (No rings...)
+
+        // Move paddle
+        if (rightPress && plX < canvas.width - plWidth) {
+            plX += 7;
+        } else if (leftPress && plX > 0) {
+            plX -= 7;
+        }
+
+        updateBallPosition();
+        drawBall();   // Now uses image
+        drawPlayer();
+        drawBricks();
+        drawScore();
+	    drawTime();
+		
+        requestAnimationFrame(gameLoop);
+    }
+
+    function resetGame() {
+    // Ball position change
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+
+    // Stop ball/Reset ball speed
+    ballSpeedX = 4;
+    ballSpeedY = -4;
+
+    // Score reset
+    score = 0;
+
+    // Time reset
+    startTime = Date.now();
+    elapsedTime = 0;
+
+    createBricks();
+    }
+    // Start game when images load
+    Promise.all([
+        ballImg.decode(),
+        ...brickImages.map(src => {
+            const img = new Image();
+            img.src = src;
+            return img.decode();
+        })
+    ]).then(() => {
+	    startTime = Date.now();
+        createBricks(); // Check brickz
+        gameLoop(); // Start game loop
+    }).catch(err => {
+        console.error("Image loading failed:", err);
+    });	
+</script>
+</body>
+</html>

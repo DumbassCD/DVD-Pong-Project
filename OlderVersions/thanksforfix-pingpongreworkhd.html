@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <title>fixed ping pong rework</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+        }
+        canvas {
+            border: 3px solid #00ACE6;
+            background: #222;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    //player param plate 
+    let plHeight = 10; // высота - height 
+    let plWidth = 75;  //ширина - width
+    let plX = (canvas.width - plWidth) / 2;
+    let plY = canvas.height - plHeight - 10;
+    let rightPress = false;
+    let leftPress = false;
+
+    //ping ball1221
+    let ballRadius = 10;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height / 2;
+    let ballSpeedX = 4;
+    let ballSpeedY = -4;
+
+    document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keyup', keyUpHandler);
+
+    function keyDownHandler(e) {
+        if (e.keyCode === 39) { //Look -->
+            rightPress = true;
+        } else if (e.keyCode === 37) { //Look <--
+            leftPress = true;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if (e.keyCode === 39) { //code 
+            rightPress = false;
+        } else if (e.keyCode === 37) {
+            leftPress = false;
+        }
+    }
+
+    function drawPlayer() {
+        ctx.fillStyle = 'blue'; //im a loser
+        ctx.fillRect(plX, plY, plWidth, plHeight);
+    }
+
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = '#00ACE6';
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function updateBallPosition() {
+        //bounce l-r 1-2 wall positions
+        if (ballX + ballSpeedX < ballRadius || ballX + ballSpeedX > canvas.width - ballRadius) {
+            ballSpeedX = -ballSpeedX;
+        }
+
+        //bounce off top wall
+        if (ballY + ballSpeedY < ballRadius) {
+            ballSpeedY = -ballSpeedY;
+        }
+
+        //paddle hit plate
+        if (
+            ballY + ballSpeedY > plY - ballRadius &&
+            ballY + ballSpeedY < plY + plHeight &&
+            ballX > plX &&
+            ballX < plX + plWidth
+        ) {
+            ballSpeedY = -ballSpeedY;
+            //bounce angle
+            ballSpeedX += (Math.random() - 0.5) * 2;
+        }
+
+        if (ballY + ballSpeedY > canvas.height - ballRadius) {
+            alert("Game Over....");
+            document.location.reload();
+            return;
+        }
+
+        ballX += ballSpeedX;
+        ballY += ballSpeedY;
+    }
+
+    function gameLoop() {
+        //Canvas erase-clear
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //move paddle plate
+        if (rightPress && plX < canvas.width - plWidth) {
+            plX += 7;
+        } else if (leftPress && plX > 0) {  // ← FIXED: was "pl Newton"
+            plX -= 7;
+        }
+
+        //ball
+        updateBallPosition();
+        drawBall();
+
+        //loomer
+        drawPlayer();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    //Looper
+    gameLoop();
+    </script>
+</body>
+</html>
